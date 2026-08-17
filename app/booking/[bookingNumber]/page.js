@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import PhoneInput, {
+  isValidPhoneNumber,
+} from "../../../components/shared/PhoneInput";
 
 function formatWait(minutes) {
   if (minutes <= 0) return "No wait";
@@ -62,6 +65,12 @@ export default function BookingPage() {
   async function handleCancel(event) {
     event.preventDefault();
     setCancelError(null);
+
+    if (!isValidPhoneNumber(cancelPhone)) {
+      setCancelError("Enter a valid phone number");
+      return;
+    }
+
     setCancelling(true);
 
     try {
@@ -178,14 +187,10 @@ export default function BookingPage() {
                       >
                         Enter your phone number to confirm cancellation
                       </label>
-                      <input
-                        id="cancel-phone"
-                        type="tel"
+                      <PhoneInput
                         value={cancelPhone}
-                        onChange={(event) => setCancelPhone(event.target.value)}
-                        required
-                        placeholder="+91…"
-                        className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-950 focus:outline-none"
+                        onChange={setCancelPhone}
+                        placeholder="Phone number"
                       />
                       {cancelError && (
                         <p className="text-sm text-red-600">{cancelError}</p>

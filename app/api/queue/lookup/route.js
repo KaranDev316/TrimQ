@@ -1,4 +1,5 @@
 import { BOOKING_STATUS } from "../../../../constants/status";
+import { normalizePhone } from "../../../../lib/phone";
 import { getPosition } from "../../../../lib/queue/position";
 import { supabaseServer } from "../../../../lib/supabase/server";
 
@@ -20,10 +21,16 @@ export async function POST(request) {
       return jsonError("Missing phone", 400);
     }
 
+    const normalizedPhone = normalizePhone(phone);
+
+    if (!normalizedPhone) {
+      return jsonError("Enter a valid phone number", 400);
+    }
+
     const { data: customer, error: customerError } = await supabaseServer
       .from("customers")
       .select("id, name")
-      .eq("phone", phone)
+      .eq("phone", normalizedPhone)
       .order("created_at", { ascending: true })
       .limit(1)
       .maybeSingle();

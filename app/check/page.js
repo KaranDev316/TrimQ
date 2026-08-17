@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import PhoneInput, {
+  isValidPhoneNumber,
+} from "../../components/shared/PhoneInput";
 
 export default function CheckQueuePage() {
   const [phone, setPhone] = useState("");
@@ -12,6 +15,12 @@ export default function CheckQueuePage() {
     event.preventDefault();
     setError(null);
     setStatus(null);
+
+    if (!isValidPhoneNumber(phone)) {
+      setError("Enter a valid phone number");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -68,15 +77,13 @@ export default function CheckQueuePage() {
               >
                 Phone
               </label>
-              <input
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-                required
-                placeholder="+91…"
-                className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-950 focus:outline-none"
-              />
+              <div className="mt-1">
+                <PhoneInput
+                  value={phone}
+                  onChange={setPhone}
+                  placeholder="Phone number"
+                />
+              </div>
             </div>
 
             {error && (

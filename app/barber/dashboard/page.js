@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseClient } from "../../../lib/supabase/client";
+import PhoneInput, {
+  isValidPhoneNumber,
+} from "../../../components/shared/PhoneInput";
 
 function formatTime(value) {
   if (!value) return "—";
@@ -213,6 +216,12 @@ export default function BarberDashboardPage() {
   async function handleAddSubmit(event) {
     event.preventDefault();
     setAddError(null);
+
+    if (!isValidPhoneNumber(addPhone)) {
+      setAddError("Enter a valid phone number");
+      return;
+    }
+
     setAddSubmitting(true);
 
     try {
@@ -469,15 +478,13 @@ export default function BarberDashboardPage() {
                       >
                         Phone
                       </label>
-                      <input
-                        id="add-phone"
-                        type="tel"
-                        value={addPhone}
-                        onChange={(event) => setAddPhone(event.target.value)}
-                        required
-                        placeholder="+91…"
-                        className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-950 focus:outline-none"
-                      />
+                      <div className="mt-1">
+                        <PhoneInput
+                          value={addPhone}
+                          onChange={setAddPhone}
+                          placeholder="Phone number"
+                        />
+                      </div>
                     </div>
 
                     <div>

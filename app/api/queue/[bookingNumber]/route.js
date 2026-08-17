@@ -1,4 +1,5 @@
 import { BOOKING_STATUS } from "../../../../constants/status";
+import { normalizePhone } from "../../../../lib/phone";
 import { getPosition } from "../../../../lib/queue/position";
 import { estimateWaitMinutes } from "../../../../lib/queue/waitTime";
 import { supabaseServer } from "../../../../lib/supabase/server";
@@ -59,6 +60,12 @@ export async function PATCH(request, { params }) {
       return jsonError("Missing phone", 400);
     }
 
+    const normalizedPhone = normalizePhone(phone);
+
+    if (!normalizedPhone) {
+      return jsonError("Enter a valid phone number", 400);
+    }
+
     const { data: booking, error } = await supabaseServer
       .from("bookings")
       .select("status, customers(phone)")
@@ -73,7 +80,7 @@ export async function PATCH(request, { params }) {
       return jsonError("Booking not found", 404);
     }
 
-    if (booking.customers?.phone !== phone) {
+    if (normalizePhone(booking.customers?.phone) !== normalizedPhone) {
       return jsonError("Not your booking", 403);
     }
 

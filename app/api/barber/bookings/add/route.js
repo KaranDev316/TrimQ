@@ -31,6 +31,10 @@ export async function POST(request) {
       price,
     });
 
+    if (result.invalid_phone) {
+      return jsonError("Enter a valid phone number", 400);
+    }
+
     if (result.duplicate) {
       return jsonError("You already have a booking", 409);
     }

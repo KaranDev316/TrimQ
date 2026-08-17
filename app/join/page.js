@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import PhoneInput, {
+  isValidPhoneNumber,
+} from "../../components/shared/PhoneInput";
 
 export default function JoinPage() {
   const router = useRouter();
@@ -41,6 +44,12 @@ export default function JoinPage() {
   async function handleSubmit(event) {
     event.preventDefault();
     setError(null);
+
+    if (!isValidPhoneNumber(phone)) {
+      setError("Enter a valid phone number");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -106,15 +115,13 @@ export default function JoinPage() {
               <label htmlFor="phone" className="block text-sm font-medium text-zinc-700">
                 Phone
               </label>
-              <input
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-                required
-                placeholder="+91…"
-                className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-950 focus:outline-none"
-              />
+              <div className="mt-1">
+                <PhoneInput
+                  value={phone}
+                  onChange={setPhone}
+                  placeholder="Phone number"
+                />
+              </div>
             </div>
 
             <div>

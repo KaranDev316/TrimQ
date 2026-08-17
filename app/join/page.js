@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabaseClient } from "../../lib/supabase/client";
 
 export default function JoinPage() {
   const router = useRouter();
@@ -21,16 +20,13 @@ export default function JoinPage() {
   useEffect(() => {
     async function loadLocations() {
       try {
-        const { data, error } = await supabaseClient
-          .from("locations")
-          .select("id, name")
-          .eq("active", true)
-          .order("name");
+        const response = await fetch("/api/locations");
+        const body = await response.json().catch(() => ({}));
 
-        if (error) {
+        if (!response.ok) {
           setLocationsError(true);
         } else {
-          setLocations(data ?? []);
+          setLocations(body.locations ?? []);
         }
       } catch {
         setLocationsError(true);

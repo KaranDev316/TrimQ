@@ -105,16 +105,13 @@ export default function BarberDashboardPage() {
 
     async function loadLocations() {
       try {
-        const { data: locs, error } = await supabaseClient
-          .from("locations")
-          .select("id, name")
-          .eq("active", true)
-          .order("name");
+        const response = await fetch("/api/locations");
+        const body = await response.json().catch(() => ({}));
 
-        if (error) {
+        if (!response.ok) {
           setLocations([]);
         } else {
-          setLocations(locs ?? []);
+          setLocations(body.locations ?? []);
         }
       } catch {
         setLocations([]);
@@ -645,7 +642,6 @@ export default function BarberDashboardPage() {
     </main>
   );
 }
-
 
 
 

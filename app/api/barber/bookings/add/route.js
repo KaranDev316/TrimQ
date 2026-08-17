@@ -1,5 +1,6 @@
-import { createBooking } from "../../../../lib/queue/createBooking";
-import { supabaseServer } from "../../../../lib/supabase/server";
+import { createBooking } from "../../../../../lib/queue/createBooking";
+import { requireBarberSession } from "../../../../../lib/supabase/authCheck";
+import { supabaseServer } from "../../../../../lib/supabase/server";
 
 function jsonError(message, status) {
   return Response.json({ error: message }, { status });
@@ -7,33 +8,27 @@ function jsonError(message, status) {
 
 export async function POST(request) {
   try {
+    const user = await requireBarberSession(request);
+
+    if (!user) {
+      return jsonError("Unauthorized", 401);
+    }
+
     const body = await request.json();
     const name = body?.name?.trim();
     const phone = body?.phone?.trim();
     const locationId = body?.location_id?.trim();
+    const price = body?.price;
 
     if (!name || !phone || !locationId) {
       return jsonError("Missing required fields", 400);
-    }
-
-    const { data: settings, error: settingsError } = await supabaseServer
-      .from("barber_settings")
-      .select("accepting_customers")
-      .limit(1)
-      .maybeSingle();
-
-    if (settingsError) {
-      throw settingsError;
-    }
-
-    if (settings?.accepting_customers === false) {
-      return jsonError("Queue is currently closed", 403);
     }
 
     const result = await createBooking(supabaseServer, {
       name,
       phone,
       location_id: locationId,
+      price,
     });
 
     if (result.duplicate) {
@@ -48,7 +43,7 @@ export async function POST(request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Failed to join queue", error);
+    console.error("Failed to add booking", error);
     return jsonError("Something went wrong", 500);
   }
 }

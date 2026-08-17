@@ -54,12 +54,18 @@ export default async function Home() {
                     : `${waitingCount} people waiting`}
                 </p>
               </div>
-              <div className="mt-6">
+              <div className="mt-6 flex flex-wrap gap-3">
                 <a
                   href="/join"
                   className="inline-flex min-h-12 items-center justify-center rounded-md bg-zinc-950 px-6 text-sm font-semibold text-white transition hover:bg-zinc-800"
                 >
                   Join Queue
+                </a>
+                <a
+                  href="/check"
+                  className="inline-flex min-h-12 items-center justify-center rounded-md border border-zinc-300 bg-white px-6 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-100"
+                >
+                  Check my queue
                 </a>
               </div>
             </>
@@ -70,6 +76,12 @@ export default async function Home() {
                 The barber is not accepting new customers right now. Check back
                 later.
               </p>
+              <a
+                href="/check"
+                className="mt-4 inline-flex min-h-12 items-center justify-center rounded-md border border-zinc-300 bg-white px-6 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-100"
+              >
+                Check my queue
+              </a>
             </div>
           )}
         </div>

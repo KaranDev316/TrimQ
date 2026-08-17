@@ -4,13 +4,13 @@ This reconciles the original "5 screens" sketch against what's actually scoped a
 
 ---
 
-## Final page list (5 pages)
+## Final page list (6 pages)
 
 ### 1. Customer Home — `/`
 
 Shows who's currently being served and how many people are waiting. Entry point to `/join`. If the barber has toggled `accepting_customers` off, shows a "queue closed" message instead of the join link.
 
-**Changed from the original sketch:** the "Already joined? [CHECK MY POSITION]" button is **not included**. There's no search-by-phone or search-by-booking-number lookup built in V1 — customers reach `/booking/[bookingNumber]` only via the direct link they're given right after joining (redirect on submit) or by keeping the URL. Adding a lookup screen would be new scope beyond what `VERTICAL_SLICE.md` §5/§8 defined.
+**Changed from the original sketch:** the home page shows a "Check my queue" button (next to "Join Queue", and also while the queue is closed) that leads to `/check`, where a customer enters their phone number to see their own live status (see Page 6). There's still no search-by-booking-number lookup — customers reach `/booking/[bookingNumber]` via the direct link they're given right after joining.
 
 ---
 
@@ -48,12 +48,18 @@ Now-cutting card with complete button, waiting list with start/cancel per row, a
 
 ---
 
+### 6. Check My Queue — `/check`
+
+A phone-number lookup: the customer enters the phone number they used to book, and the page shows only that booking's live status — booking number, name, location, position, currently-serving booking number, people ahead, and status. This is intentionally privacy-scoped: given only a phone number it returns only the matched customer's queue status, never other customers' names or a directory of the queue.
+
+---
+
 ## Explicitly excluded from V1
 
 These appeared in the surrounding product discussion but are not pages in this build, per `CONTEXT.md`'s out-of-scope list — listed here so no future session assumes they're missing by accident:
 
 - Any notification/alert screen (no WhatsApp API integration)
-- A booking lookup/search screen (see Page 1 above)
+- A search-by-booking-number lookup screen (a phone-number status lookup now exists at `/check` — see Page 6 — but there's no way to look up a booking by its number)
 - Exact-appointment-time screens (V1 only shows estimated wait ranges)
 - Multiple-barber selection screens (single barber only)
 - Payment screens

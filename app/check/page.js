@@ -36,7 +36,7 @@ export default function CheckQueuePage() {
         setStatus(body);
       } else if (response.status === 404) {
         setError(
-          "We couldn't find an active booking for that phone number. If you just joined, use the link you were given."
+          "We couldn't find an active booking for that phone number. Please check the number, then try again."
         );
       } else if (response.status === 400) {
         setError(body.error || "Please enter your phone number.");
@@ -75,13 +75,13 @@ export default function CheckQueuePage() {
                 htmlFor="phone"
                 className="block text-sm font-medium text-zinc-700"
               >
-                Phone
+                WhatsApp Number
               </label>
               <div className="mt-1">
                 <PhoneInput
                   value={phone}
                   onChange={setPhone}
-                  placeholder="Phone number"
+                  placeholder="Enter WhatsApp number"
                 />
               </div>
             </div>
@@ -148,7 +148,7 @@ export default function CheckQueuePage() {
                     </p>
                     <p>
                       <span className="text-zinc-500">Estimated wait:</span>{" "}
-                      <span className="font-medium">may vary</span>
+                      <span className="font-medium">Estimated — actual time may vary</span>
                     </p>
                   </>
                 )}

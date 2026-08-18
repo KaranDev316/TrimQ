@@ -190,7 +190,7 @@ export default function BookingPage() {
                       <PhoneInput
                         value={cancelPhone}
                         onChange={setCancelPhone}
-                        placeholder="Phone number"
+                        placeholder="Enter WhatsApp number"
                       />
                       {cancelError && (
                         <p className="text-sm text-red-600">{cancelError}</p>

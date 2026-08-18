@@ -476,13 +476,13 @@ export default function BarberDashboardPage() {
                         htmlFor="add-phone"
                         className="block text-sm font-medium text-zinc-700"
                       >
-                        Phone
+                        WhatsApp Number
                       </label>
                       <div className="mt-1">
                         <PhoneInput
                           value={addPhone}
                           onChange={setAddPhone}
-                          placeholder="Phone number"
+                          placeholder="Enter WhatsApp number"
                         />
                       </div>
                     </div>

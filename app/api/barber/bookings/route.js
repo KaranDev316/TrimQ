@@ -7,9 +7,56 @@ function jsonError(message, status) {
   return Response.json({ error: message }, { status });
 }
 
+function isMissingAddressColumn(error) {
+  return error?.code === "42703" && error?.message?.includes("bookings.address");
+}
+
 function startOfToday() {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
+async function loadCuttingBooking() {
+  const query = () =>
+    supabaseServer
+      .from("bookings")
+      .select(
+        "id, booking_number, customers(name), locations(name), address, started_at"
+      )
+      .eq("status", BOOKING_STATUS.CUTTING)
+      .limit(1)
+      .maybeSingle();
+
+  const result = await query();
+
+  if (!isMissingAddressColumn(result.error)) {
+    return result;
+  }
+
+  return supabaseServer
+    .from("bookings")
+    .select("id, booking_number, customers(name), locations(name), started_at")
+    .eq("status", BOOKING_STATUS.CUTTING)
+    .limit(1)
+    .maybeSingle();
+}
+
+async function loadWaitingBookings() {
+  const result = await supabaseServer
+    .from("bookings")
+    .select("id, booking_number, customers(name), locations(name), address, joined_at")
+    .eq("status", BOOKING_STATUS.WAITING)
+    .order("joined_at", { ascending: true });
+
+  if (!isMissingAddressColumn(result.error)) {
+    return result;
+  }
+
+  return supabaseServer
+    .from("bookings")
+    .select("id, booking_number, customers(name), locations(name), joined_at")
+    .eq("status", BOOKING_STATUS.WAITING)
+    .order("joined_at", { ascending: true });
 }
 
 export async function GET(request) {
@@ -21,25 +68,15 @@ export async function GET(request) {
     }
 
     // The single booking currently being cut (or null).
-    const { data: cutting, error: cuttingError } = await supabaseServer
-      .from("bookings")
-      .select(
-        "id, booking_number, customers(name), locations(name), started_at"
-      )
-      .eq("status", BOOKING_STATUS.CUTTING)
-      .limit(1)
-      .maybeSingle();
+    const { data: cutting, error: cuttingError } = await loadCuttingBooking();
 
     if (cuttingError) {
       throw cuttingError;
     }
 
     // All waiting bookings, oldest first.
-    const { data: waitingBookings, error: waitingError } = await supabaseServer
-      .from("bookings")
-      .select("id, booking_number, customers(name), locations(name), joined_at")
-      .eq("status", BOOKING_STATUS.WAITING)
-      .order("joined_at", { ascending: true });
+    const { data: waitingBookings, error: waitingError } =
+      await loadWaitingBookings();
 
     if (waitingError) {
       throw waitingError;
@@ -55,6 +92,7 @@ export async function GET(request) {
         booking_number: booking.booking_number,
         name: booking.customers?.name ?? null,
         location: booking.locations?.name ?? null,
+        address: booking.address ?? null,
         joined_at: booking.joined_at,
         position,
       });
@@ -102,6 +140,7 @@ export async function GET(request) {
               booking_number: cutting.booking_number,
               name: cutting.customers?.name ?? null,
               location: cutting.locations?.name ?? null,
+              address: cutting.address ?? null,
               started_at: cutting.started_at,
             }
           : null,

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import PhoneInput, {
   isValidPhoneNumber,
 } from "../../components/shared/PhoneInput";
+import { isCustomerLocation } from "../../lib/locations";
 
 export default function JoinPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function JoinPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [locationId, setLocationId] = useState("");
+  const [address, setAddress] = useState("");
 
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -41,6 +43,11 @@ export default function JoinPage() {
     loadLocations();
   }, []);
 
+  const selectedLocation = locations.find((location) => location.id === locationId);
+  const showAddressField = Boolean(
+    selectedLocation && isCustomerLocation(selectedLocation.name)
+  );
+
   async function handleSubmit(event) {
     event.preventDefault();
     setError(null);
@@ -56,7 +63,12 @@ export default function JoinPage() {
       const response = await fetch("/api/queue/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, location_id: locationId }),
+        body: JSON.stringify({
+          name,
+          phone,
+          location_id: locationId,
+          address: showAddressField ? address : "",
+        }),
       });
 
       const body = await response.json().catch(() => ({}));
@@ -136,7 +148,18 @@ export default function JoinPage() {
                 <select
                   id="location"
                   value={locationId}
-                  onChange={(event) => setLocationId(event.target.value)}
+                  onChange={(event) => {
+                    const nextLocationId = event.target.value;
+                    const nextLocation = locations.find(
+                      (location) => location.id === nextLocationId
+                    );
+
+                    setLocationId(nextLocationId);
+
+                    if (!nextLocation || !isCustomerLocation(nextLocation.name)) {
+                      setAddress("");
+                    }
+                  }}
                   required
                   className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-950 focus:outline-none"
                 >
@@ -151,6 +174,26 @@ export default function JoinPage() {
                 </select>
               )}
             </div>
+
+            {showAddressField && (
+              <div>
+                <label
+                  htmlFor="address"
+                  className="block text-sm font-medium text-zinc-700"
+                >
+                  Apartment name
+                </label>
+                <input
+                  id="address"
+                  type="text"
+                  value={address}
+                  onChange={(event) => setAddress(event.target.value)}
+                  required
+                  placeholder="Enter apartment name"
+                  className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-950 focus:outline-none"
+                />
+              </div>
+            )}
 
             {error && (
               <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>

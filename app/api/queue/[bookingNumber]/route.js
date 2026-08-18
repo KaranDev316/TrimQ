@@ -9,15 +9,33 @@ function jsonError(message, status) {
   return Response.json({ error: message }, { status });
 }
 
+function isMissingAddressColumn(error) {
+  return error?.code === "42703" && error?.message?.includes("bookings.address");
+}
+
+async function loadBooking(bookingNumber) {
+  const result = await supabaseServer
+    .from("bookings")
+    .select("id, booking_number, status, address, customers(name), locations(name)")
+    .eq("booking_number", bookingNumber)
+    .maybeSingle();
+
+  if (!isMissingAddressColumn(result.error)) {
+    return result;
+  }
+
+  return supabaseServer
+    .from("bookings")
+    .select("id, booking_number, status, customers(name), locations(name)")
+    .eq("booking_number", bookingNumber)
+    .maybeSingle();
+}
+
 export async function GET(request, { params }) {
   try {
     const { bookingNumber } = await params;
 
-    const { data: booking, error } = await supabaseServer
-      .from("bookings")
-      .select("id, booking_number, status, customers(name), locations(name)")
-      .eq("booking_number", bookingNumber)
-      .maybeSingle();
+    const { data: booking, error } = await loadBooking(bookingNumber);
 
     if (error) {
       throw error;
@@ -31,6 +49,7 @@ export async function GET(request, { params }) {
       booking_number: booking.booking_number,
       name: booking.customers?.name ?? null,
       location: customerLocationName(booking.locations?.name ?? null),
+      address: booking.address ?? null,
       status: booking.status,
     };
 

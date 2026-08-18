@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { isCustomerLocation } from "../../../lib/locations";
 import { supabaseClient } from "../../../lib/supabase/client";
 import PhoneInput, {
   isValidPhoneNumber,
@@ -38,6 +39,7 @@ export default function BarberDashboardPage() {
   const [addName, setAddName] = useState("");
   const [addPhone, setAddPhone] = useState("");
   const [addLocationId, setAddLocationId] = useState("");
+  const [addAddress, setAddAddress] = useState("");
   const [addPrice, setAddPrice] = useState("");
   const [locations, setLocations] = useState([]);
   const [locationsLoading, setLocationsLoading] = useState(true);
@@ -213,6 +215,13 @@ export default function BarberDashboardPage() {
     }
   }
 
+  const selectedAddLocation = locations.find(
+    (location) => location.id === addLocationId
+  );
+  const showAddAddressField = Boolean(
+    selectedAddLocation && isCustomerLocation(selectedAddLocation.name)
+  );
+
   async function handleAddSubmit(event) {
     event.preventDefault();
     setAddError(null);
@@ -232,6 +241,7 @@ export default function BarberDashboardPage() {
           name: addName,
           phone: addPhone,
           location_id: addLocationId,
+          address: showAddAddressField ? addAddress : "",
           price: addPrice ? Number(addPrice) : undefined,
         }),
       });
@@ -257,6 +267,7 @@ export default function BarberDashboardPage() {
       setAddName("");
       setAddPhone("");
       setAddLocationId("");
+      setAddAddress("");
       setAddPrice("");
       setActionError(null);
       await loadDashboard({ silent: true });
@@ -358,8 +369,13 @@ export default function BarberDashboardPage() {
                 <div className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50 p-5">
                   <p className="text-lg font-semibold">{data.cutting.name}</p>
                   <p className="mt-1 text-sm text-zinc-600">
-                    Started at {formatTime(data.cutting.started_at)}
+                    {data.cutting.location} · started at {formatTime(data.cutting.started_at)}
                   </p>
+                  {data.cutting.address && (
+                    <p className="mt-1 text-sm text-zinc-600">
+                      Apartment: {data.cutting.address}
+                    </p>
+                  )}
                   <button
                     type="button"
                     onClick={() => handleComplete(data.cutting.id)}
@@ -399,9 +415,13 @@ export default function BarberDashboardPage() {
                         <div>
                           <p className="font-semibold">{booking.name}</p>
                           <p className="mt-0.5 text-sm text-zinc-600">
-                            {booking.location} · joined{" "}
-                            {formatTime(booking.joined_at)}
+                            {booking.location} · joined {formatTime(booking.joined_at)}
                           </p>
+                          {booking.address && (
+                            <p className="mt-1 text-xs text-zinc-600">
+                              Apartment: {booking.address}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="mt-3 flex gap-2">
@@ -498,7 +518,18 @@ export default function BarberDashboardPage() {
                         <select
                           id="add-location"
                           value={addLocationId}
-                          onChange={(event) => setAddLocationId(event.target.value)}
+                          onChange={(event) => {
+                            const nextLocationId = event.target.value;
+                            const nextLocation = locations.find(
+                              (location) => location.id === nextLocationId
+                            );
+
+                            setAddLocationId(nextLocationId);
+
+                            if (!nextLocation || !isCustomerLocation(nextLocation.name)) {
+                              setAddAddress("");
+                            }
+                          }}
                           required
                           className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-950 focus:outline-none"
                         >
@@ -513,6 +544,26 @@ export default function BarberDashboardPage() {
                         </select>
                       )}
                     </div>
+
+                    {showAddAddressField && (
+                      <div>
+                        <label
+                          htmlFor="add-address"
+                          className="block text-sm font-medium text-zinc-700"
+                        >
+                          Apartment name
+                        </label>
+                        <input
+                          id="add-address"
+                          type="text"
+                          value={addAddress}
+                          onChange={(event) => setAddAddress(event.target.value)}
+                          required
+                          placeholder="Enter apartment name"
+                          className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-950 focus:outline-none"
+                        />
+                      </div>
+                    )}
 
                     <div>
                       <label

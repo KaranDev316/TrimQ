@@ -164,6 +164,13 @@ export default function BookingPage() {
                   <dt className="text-sm text-zinc-500">Location</dt>
                   <dd className="font-medium">{booking.location}</dd>
                 </div>
+
+                {booking.address && (
+                  <div>
+                    <dt className="text-sm text-zinc-500">Apartment name</dt>
+                    <dd className="font-medium">{booking.address}</dd>
+                  </div>
+                )}
               </dl>
 
               {booking.status === "waiting" && (

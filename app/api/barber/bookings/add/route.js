@@ -19,6 +19,7 @@ export async function POST(request) {
     const phone = body?.phone?.trim();
     const locationId = body?.location_id?.trim();
     const price = body?.price;
+    const address = body?.address?.trim();
 
     if (!name || !phone || !locationId) {
       return jsonError("Missing required fields", 400);
@@ -29,10 +30,19 @@ export async function POST(request) {
       phone,
       location_id: locationId,
       price,
+      address,
     });
 
     if (result.invalid_phone) {
       return jsonError("Enter a valid phone number", 400);
+    }
+
+    if (result.invalid_location) {
+      return jsonError("Invalid location", 400);
+    }
+
+    if (result.address_required) {
+      return jsonError("Enter your apartment name", 400);
     }
 
     if (result.duplicate) {

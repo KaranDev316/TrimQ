@@ -3,6 +3,7 @@ import { normalizePhone } from "../../../../lib/phone";
 import { getPosition } from "../../../../lib/queue/position";
 import { estimateWaitMinutes } from "../../../../lib/queue/waitTime";
 import { supabaseServer } from "../../../../lib/supabase/server";
+import { customerLocationName } from "../../../../lib/locations";
 
 function jsonError(message, status) {
   return Response.json({ error: message }, { status });
@@ -29,7 +30,7 @@ export async function GET(request, { params }) {
     const response = {
       booking_number: booking.booking_number,
       name: booking.customers?.name ?? null,
-      location: booking.locations?.name ?? null,
+      location: customerLocationName(booking.locations?.name ?? null),
       status: booking.status,
     };
 

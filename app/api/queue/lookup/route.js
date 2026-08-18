@@ -2,6 +2,7 @@ import { BOOKING_STATUS } from "../../../../constants/status";
 import { normalizePhone } from "../../../../lib/phone";
 import { getPosition } from "../../../../lib/queue/position";
 import { supabaseServer } from "../../../../lib/supabase/server";
+import { customerLocationName } from "../../../../lib/locations";
 
 function jsonError(message, status) {
   return Response.json({ error: message }, { status });
@@ -77,7 +78,7 @@ export async function POST(request) {
       {
         booking_number: booking.booking_number,
         name: customer.name,
-        location: booking.locations?.name ?? null,
+        location: customerLocationName(booking.locations?.name ?? null),
         position,
         status: booking.status,
         currently_serving: cutting?.booking_number ?? null,

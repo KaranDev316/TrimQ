@@ -1,70 +1,51 @@
 import { supabaseServer } from "../../../lib/supabase/server";
-
-const DEFAULT_LOCATIONS = ["Barber's Hostel", "NRI Hostel", "Customer Location"];
+import {
+  CANONICAL_LOCATIONS,
+  LEGACY_LOCATION_RENAMES,
+  formatLocationOption,
+  sortLocationOptions,
+} from "../../../lib/locations";
 
 function jsonError(message, status) {
   return Response.json({ error: message }, { status });
 }
 
-async function ensureDefaultLocations() {
-  const { data: existingLocations, error: lookupError } = await supabaseServer
-    .from("locations")
-    .select("name")
-    .in("name", DEFAULT_LOCATIONS);
+function dedupeLocations(locations) {
+  const optionsByName = new Map();
 
-  if (lookupError) {
-    throw lookupError;
-  }
+  for (const location of locations) {
+    const option = formatLocationOption(location);
+    const existing = optionsByName.get(option.name);
+    const isCanonical = location.name === option.name;
 
-  const existingNames = new Set((existingLocations ?? []).map((location) => location.name));
-  const missingLocations = DEFAULT_LOCATIONS.filter((name) => !existingNames.has(name)).map(
-    (name) => ({ name, active: true })
-  );
-
-  if (missingLocations.length === 0) {
-    const { error: updateError } = await supabaseServer
-      .from("locations")
-      .update({ active: true })
-      .in("name", DEFAULT_LOCATIONS);
-
-    if (updateError) {
-      throw updateError;
+    if (!existing || isCanonical) {
+      optionsByName.set(option.name, option);
     }
-
-    return;
   }
 
-  const { error: insertError } = await supabaseServer.from("locations").insert(missingLocations);
-
-  if (insertError) {
-    throw insertError;
-  }
-
-  const { error: updateError } = await supabaseServer
-    .from("locations")
-    .update({ active: true })
-    .in("name", DEFAULT_LOCATIONS);
-
-  if (updateError) {
-    throw updateError;
-  }
+  return sortLocationOptions([...optionsByName.values()]);
 }
 
 export async function GET() {
   try {
-    await ensureDefaultLocations();
+    const readableLocationNames = [
+      ...CANONICAL_LOCATIONS,
+      ...Object.keys(LEGACY_LOCATION_RENAMES),
+    ];
 
     const { data: locations, error } = await supabaseServer
       .from("locations")
       .select("id, name")
       .eq("active", true)
-      .order("name");
+      .in("name", readableLocationNames);
 
     if (error) {
       throw error;
     }
 
-    return Response.json({ locations: locations ?? [] });
+    return Response.json({
+      locations: dedupeLocations(locations ?? []),
+    });
   } catch (error) {
     console.error("Failed to load locations", error);
     return jsonError("Could not load locations", 500);

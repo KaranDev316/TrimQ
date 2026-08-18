@@ -35,6 +35,6 @@ create table barber_settings (
 );
 
 insert into locations (name) values
-  ('Barber''s Hostel'), ('NRI Hostel'), ('Customer Location');
+  ('G9 Hostel'), ('New NRI Hostel'), ('Customer Location');
 
 insert into barber_settings (accepting_customers) values (true);

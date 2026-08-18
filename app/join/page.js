@@ -113,14 +113,10 @@ export default function JoinPage() {
 
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-zinc-700">
-                WhatsApp Number
+                Phone Number
               </label>
               <div className="mt-1">
-                <PhoneInput
-                  value={phone}
-                  onChange={setPhone}
-                  placeholder="Enter WhatsApp number"
-                />
+                <PhoneInput value={phone} onChange={setPhone} />
               </div>
             </div>
 
@@ -149,7 +145,7 @@ export default function JoinPage() {
                   </option>
                   {locations.map((location) => (
                     <option key={location.id} value={location.id}>
-                      {location.name}
+                      {location.customer_name}
                     </option>
                   ))}
                 </select>

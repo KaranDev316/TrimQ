@@ -113,7 +113,7 @@ function CountrySelect({ country, onCountryChange }) {
   );
 }
 
-export default function PhoneField({ value, onChange, placeholder = "Enter WhatsApp number" }) {
+export default function PhoneField({ value, onChange, placeholder = "Enter phone number" }) {
   const [country, setCountry] = useState("IN");
 
   useEffect(() => {

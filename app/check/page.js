@@ -75,14 +75,10 @@ export default function CheckQueuePage() {
                 htmlFor="phone"
                 className="block text-sm font-medium text-zinc-700"
               >
-                WhatsApp Number
+                Phone Number
               </label>
               <div className="mt-1">
-                <PhoneInput
-                  value={phone}
-                  onChange={setPhone}
-                  placeholder="Enter WhatsApp number"
-                />
+                <PhoneInput value={phone} onChange={setPhone} />
               </div>
             </div>
 

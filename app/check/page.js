@@ -1,20 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import PhoneInput, {
   isValidPhoneNumber,
 } from "../../components/shared/PhoneInput";
 
 export default function CheckQueuePage() {
+  const router = useRouter();
+
   const [phone, setPhone] = useState("");
-  const [status, setStatus] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError(null);
-    setStatus(null);
 
     if (!isValidPhoneNumber(phone)) {
       setError("Enter a valid phone number");
@@ -33,8 +34,11 @@ export default function CheckQueuePage() {
       const body = await response.json().catch(() => ({}));
 
       if (response.status === 200) {
-        setStatus(body);
-      } else if (response.status === 404) {
+        router.push(`/booking/${body.booking_number}`);
+        return;
+      }
+
+      if (response.status === 404) {
         setError(
           "We couldn't find an active booking for that phone number. Please check the number, then try again."
         );
@@ -49,8 +53,6 @@ export default function CheckQueuePage() {
       setLoading(false);
     }
   }
-
-  const isCutting = status?.status === "cutting";
 
   return (
     <main className="min-h-screen bg-stone-50 text-zinc-950">
@@ -97,66 +99,6 @@ export default function CheckQueuePage() {
             </button>
           </form>
 
-          {status && (
-            <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-5">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
-                Your queue status
-              </h2>
-              <p className="mt-3 text-2xl font-bold">{status.booking_number}</p>
-
-              <div className="mt-4 space-y-2 text-sm">
-                <p className="flex items-center gap-2">
-                  <span aria-hidden="true">👤</span>
-                  <span className="font-medium">{status.name}</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span aria-hidden="true">📍</span>
-                  <span>{status.location}</span>
-                </p>
-                <p>
-                  <span className="text-zinc-500">Position:</span>{" "}
-                  <span className="font-medium">#{status.position}</span>
-                </p>
-                {isCutting ? (
-                  <p>
-                    <span className="text-zinc-500">Currently serving:</span>{" "}
-                    <span className="font-medium">
-                      You&apos;re in the chair
-                    </span>
-                  </p>
-                ) : (
-                  <>
-                    <p>
-                      <span className="text-zinc-500">Currently serving:</span>{" "}
-                      <span className="font-medium">
-                        {status.currently_serving ?? "—"}
-                      </span>
-                    </p>
-                    <p>
-                      <span className="text-zinc-500">Ahead of you:</span>{" "}
-                      <span className="font-medium">
-                        {status.people_ahead === 0
-                          ? "You're next"
-                          : `${status.people_ahead} ${
-                              status.people_ahead === 1 ? "person" : "people"
-                            }`}
-                      </span>
-                    </p>
-                    <p>
-                      <span className="text-zinc-500">Estimated wait:</span>{" "}
-                      <span className="font-medium">Estimated — actual time may vary</span>
-                    </p>
-                  </>
-                )}
-                <p>
-                  <span className="text-zinc-500">Status:</span>{" "}
-                  <span className="font-medium">
-                    {isCutting ? "In the chair" : "Waiting"}
-                  </span>
-                </p>
-              </div>
-            </div>
-          )}
         </div>
       </section>
     </main>

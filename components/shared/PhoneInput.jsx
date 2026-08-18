@@ -4,18 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import PhoneInput, {
   getCountries,
   getCountryCallingCode,
-  isSupportedCountry,
 } from "react-phone-number-input/input-max";
-
-function detectDefaultCountry() {
-  if (typeof navigator === "undefined") return "IN";
-  const locale = navigator.language || navigator.languages?.[0] || "";
-  const region = (locale.split("-")[1] || "").toUpperCase();
-  if (region && /^[A-Z]{2}$/.test(region) && isSupportedCountry(region)) {
-    return region;
-  }
-  return "IN";
-}
 
 function countryFlagEmoji(country) {
   if (!country) return "🌐";
@@ -115,10 +104,6 @@ function CountrySelect({ country, onCountryChange }) {
 
 export default function PhoneField({ value, onChange, placeholder = "Enter phone number" }) {
   const [country, setCountry] = useState("IN");
-
-  useEffect(() => {
-    setCountry(detectDefaultCountry());
-  }, []);
 
   return (
     <div className="flex items-stretch rounded-md border border-zinc-300 bg-white transition focus-within:border-zinc-950">

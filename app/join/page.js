@@ -113,7 +113,7 @@ export default function JoinPage() {
 
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-zinc-700">
-                Phone Number
+                WhatsApp Number
               </label>
               <div className="mt-1">
                 <PhoneInput value={phone} onChange={setPhone} />

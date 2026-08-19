@@ -24,6 +24,23 @@ function todayLabel() {
   });
 }
 
+function whatsappHref(phone, booking) {
+  if (!phone) return null;
+
+  const digits = phone.replace(/\D/g, "");
+  if (!digits) return null;
+
+  const message = [
+    `Hi ${booking.name || "there"}, this is your barber.`,
+    "Can you confirm if you will come on time?",
+    booking.address
+      ? `Also, please confirm your apartment name: ${booking.address}.`
+      : "Please confirm your apartment name if needed.",
+  ].join(" ");
+
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+}
+
 export default function BarberDashboardPage() {
   const router = useRouter();
 
@@ -321,6 +338,9 @@ export default function BarberDashboardPage() {
 
   const cuttingCount = data?.cutting ? 1 : 0;
   const waitingCount = data?.waiting?.length ?? 0;
+  const cuttingWhatsappHref = data?.cutting
+    ? whatsappHref(data.cutting.phone, data.cutting)
+    : null;
 
   return (
     <main className="min-h-screen bg-stone-50 text-zinc-950">
@@ -376,6 +396,23 @@ export default function BarberDashboardPage() {
                       Apartment: {data.cutting.address}
                     </p>
                   )}
+                  {data.cutting.phone && (
+                    <div className="mt-3 flex flex-col gap-2 rounded-md border border-emerald-200 bg-white/70 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+                      <span className="font-medium text-zinc-700">
+                        {data.cutting.phone}
+                      </span>
+                      {cuttingWhatsappHref && (
+                        <a
+                          href={cuttingWhatsappHref}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex justify-center rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                        >
+                          WhatsApp
+                        </a>
+                      )}
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={() => handleComplete(data.cutting.id)}
@@ -412,11 +449,30 @@ export default function BarberDashboardPage() {
                         <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-950 text-xs font-bold text-white">
                           {booking.position}
                         </span>
-                        <div>
-                          <p className="font-semibold">{booking.name}</p>
-                          <p className="mt-0.5 text-sm text-zinc-600">
-                            {booking.location} · joined {formatTime(booking.joined_at)}
-                          </p>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                              <p className="font-semibold">{booking.name}</p>
+                              <p className="mt-0.5 text-sm text-zinc-600">
+                                {booking.location} · joined {formatTime(booking.joined_at)}
+                              </p>
+                            </div>
+                            {booking.phone && (
+                              <a
+                                href={whatsappHref(booking.phone, booking)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex shrink-0 justify-center rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                              >
+                                WhatsApp
+                              </a>
+                            )}
+                          </div>
+                          {booking.phone && (
+                            <p className="mt-2 text-xs font-medium text-zinc-700">
+                              {booking.phone}
+                            </p>
+                          )}
                           {booking.address && (
                             <p className="mt-1 text-xs text-zinc-600">
                               Apartment: {booking.address}

@@ -21,7 +21,7 @@ async function loadCuttingBooking() {
     supabaseServer
       .from("bookings")
       .select(
-        "id, booking_number, customers(name), locations(name), address, started_at"
+        "id, booking_number, customers(name, phone), locations(name), address, started_at"
       )
       .eq("status", BOOKING_STATUS.CUTTING)
       .limit(1)
@@ -35,7 +35,7 @@ async function loadCuttingBooking() {
 
   return supabaseServer
     .from("bookings")
-    .select("id, booking_number, customers(name), locations(name), started_at")
+    .select("id, booking_number, customers(name, phone), locations(name), started_at")
     .eq("status", BOOKING_STATUS.CUTTING)
     .limit(1)
     .maybeSingle();
@@ -44,7 +44,7 @@ async function loadCuttingBooking() {
 async function loadWaitingBookings() {
   const result = await supabaseServer
     .from("bookings")
-    .select("id, booking_number, customers(name), locations(name), address, joined_at")
+    .select("id, booking_number, customers(name, phone), locations(name), address, joined_at")
     .eq("status", BOOKING_STATUS.WAITING)
     .order("joined_at", { ascending: true });
 
@@ -54,7 +54,7 @@ async function loadWaitingBookings() {
 
   return supabaseServer
     .from("bookings")
-    .select("id, booking_number, customers(name), locations(name), joined_at")
+    .select("id, booking_number, customers(name, phone), locations(name), joined_at")
     .eq("status", BOOKING_STATUS.WAITING)
     .order("joined_at", { ascending: true });
 }
@@ -91,6 +91,7 @@ export async function GET(request) {
         id: booking.id,
         booking_number: booking.booking_number,
         name: booking.customers?.name ?? null,
+        phone: booking.customers?.phone ?? null,
         location: booking.locations?.name ?? null,
         address: booking.address ?? null,
         joined_at: booking.joined_at,
@@ -139,6 +140,7 @@ export async function GET(request) {
               id: cutting.id,
               booking_number: cutting.booking_number,
               name: cutting.customers?.name ?? null,
+              phone: cutting.customers?.phone ?? null,
               location: cutting.locations?.name ?? null,
               address: cutting.address ?? null,
               started_at: cutting.started_at,
